@@ -3,7 +3,7 @@ const orders = require(path.resolve("src/data/orders-data"));
 const nextId = require("../utils/nextId");
 
 // Middleware functions
-const orderExists = (req, res, next) => {
+function orderExists (req, res, next) {
    const orderId = req.params.orderId;
    res.locals.orderId = orderId;
    const foundOrder = orders.find((order) => order.id === orderId);
@@ -15,7 +15,7 @@ const orderExists = (req, res, next) => {
    res.locals.order = foundOrder;
 };
 
-const orderValidDeliverTo = (req, res, next) => {
+function orderValidDeliverTo (req, res, next) {
    const { data = null } = req.body;
    res.locals.newOD = data;
    const orderdeliverTo = data.deliverTo;
@@ -27,7 +27,7 @@ const orderValidDeliverTo = (req, res, next) => {
    }
 };
 
-const orderValidMobileNumber = (req, res, next) => {
+function orderValidMobileNumber (req, res, next) {
    const orderMobileNumber = res.locals.newOD.mobileNumber;
    if (!orderMobileNumber || orderMobileNumber.length === 0) {
       return next({
@@ -37,7 +37,7 @@ const orderValidMobileNumber = (req, res, next) => {
    }
 };
 
-const orderHasDishes = (req, res, next) => {
+function orderHasDishes(req, res, next) {
    const orderDishes = res.locals.newOD.dishes;
    if (!orderDishes || !Array.isArray(orderDishes) || orderDishes.length <= 0) {
       return next({
@@ -48,7 +48,7 @@ const orderHasDishes = (req, res, next) => {
    res.locals.dishes = orderDishes;
 };
 
-const ordersWithValidDishes = (req, res, next) => {
+function ordersWithValidDishes (req, res, next) {
    const orderDishes = res.locals.dishes;
    orderDishes.forEach((dish) => {
       const dishQuantity = dish.quantity;
@@ -63,7 +63,7 @@ const ordersWithValidDishes = (req, res, next) => {
    });
 };
 
-const orderIdMatches = (req, res, next) => {
+function orderIdMatches(req, res, next) {
    const paramId = res.locals.orderId;
    const { id = null } = res.locals.newOD;
    if (!id || id === null) {
@@ -76,7 +76,7 @@ const orderIdMatches = (req, res, next) => {
    }
 };
 
-const incomingStatusValid = (req, res, next) => {
+function incomingStatusValid (req, res, next) {
    const { status = null } = res.locals.newOD;
    if (!status || status.length === 0 || status === "invalid") {
       return next({
@@ -87,7 +87,7 @@ const incomingStatusValid = (req, res, next) => {
    }
 };
 
-const statusValid = (req, res, next) => {
+function statusValid (req, res, next) {
    const { status = null } = res.locals.order;
    if (status === "delivered") {
       return next({
@@ -97,7 +97,7 @@ const statusValid = (req, res, next) => {
    }
 };
 
-const statusPending = (req, res, next) => {
+function statusPending (req, res, next) {
    const { status = null } = res.locals.order;
    if (status !== "pending") {
       return next({
@@ -108,7 +108,7 @@ const statusPending = (req, res, next) => {
 };
 
 // Middleware Functions
-const createValidation = (req, res, next) => {
+function createValidation (req, res, next){
    orderValidDeliverTo(req, res, next);
    orderValidMobileNumber(req, res, next);
    orderHasDishes(req, res, next);
@@ -116,12 +116,12 @@ const createValidation = (req, res, next) => {
    next();
 };
 
-const readValidation = (req, res, next) => {
+function readValidation (req, res, next) {
    orderExists(req, res, next);
    next();
 };
 
-const updateValidation = (req, res, next) => {
+function updateValidation (req, res, next) {
    orderExists(req, res, next);
    orderValidDeliverTo(req, res, next);
    orderValidMobileNumber(req, res, next);
@@ -133,7 +133,7 @@ const updateValidation = (req, res, next) => {
    next();
 };
 
-const deleteValidation = (req, res, next) => {
+function deleteValidation (req, res, next) {
    orderExists(req, res, next);
    statusPending(req, res, next);
    next();
